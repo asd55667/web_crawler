@@ -7,8 +7,7 @@
 list *list_init()
 {
 	list *l;
-    if(!(l = malloc(sizeof *l)))
-		return NULL;
+    l = xmalloc(sizeof *l);
 	memset(l, 0, sizeof *l);
 	return l;
 }
@@ -19,11 +18,10 @@ int find(list *l, void *val)
 	return 0;
 }
 
-bool append(list *l, void *val)
+int list_append(list *l, void *val)
 {
 	node *tmp;
-    if(!(tmp = malloc(sizeof *tmp)))
-		return false
+    tmp = xmalloc(sizeof *tmp);
 	tmp->val = val;
 	tmp->next = 0;		
 						
@@ -39,11 +37,11 @@ bool append(list *l, void *val)
 	}
 	l->back = tmp;
 	l->size++;
-	return true;
+    return 1;
 }
 
 
-void *pop(list *l)
+void *list_pop(list *l)
 {
 	if(!l->back)
 		return 0;
@@ -72,8 +70,7 @@ void free_list(list *l)
 void **list2array(list *l)
 {
 	void **a;
-    if(!(a = (void **)calloc(l->size, sizeof(void*))))
-		return 0;
+    a = (void **)xcalloc(l->size, sizeof(void*));
 	int count = 0;
 	node *tmp = l->front;
 	while(tmp)

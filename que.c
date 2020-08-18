@@ -6,8 +6,7 @@
 que *que_init()
 {
 	que *q;
-	if(!(q = malloc(sizeof *q)))
-		return NULL;
+    q = xmalloc(sizeof *q);
 	memset(q, 0, sizeof *q);
 	return q;
 }
@@ -28,22 +27,22 @@ int is_empty(que *q)
 	return 0;
 }
 
-int append(que *q, char *val)
+int que_append(que *q, char *val)
 {
-	if((q->head - q->tail + MAX_Q) % MAX_Q == 1)
+	if((q->head - q->tail + QUE_SIZE) % QUE_SIZE == 1)
         return 0;
 	q->val[q->tail] = val;
-	q->tail = (q->tail + 1) % MAX_Q;
+	q->tail = (q->tail + 1) % QUE_SIZE;
 	q->size++;
     return 1;
 }
 
-char *pop(que *q)
+char *que_pop(que *q)
 {
 	if(is_empty(q))
 		return NULL;
 	size_t head = q->head;
-	q->head = (q->head + 1) % MAX_Q;
+	q->head = (q->head + 1) % QUE_SIZE;
 	q->size--;
 	return q->val[head];
 }
@@ -51,8 +50,7 @@ char *pop(que *q)
 que *copy(que *q)
 {
 	que *newq;
-    if(!(newq = malloc(sizeof *q)))
-        return NULL;
+    newq = xmalloc(sizeof *q);
 	memcpy(newq, q, sizeof *q);
 	return newq;
 }
@@ -60,8 +58,7 @@ que *copy(que *q)
 que *deepcopy(que *q)
 {	
 	que *newq;
-	if(!(newq = malloc(sizeof *q)))
-		return NULL;
+    newq = xmalloc(sizeof *q);
 	newq->size = q->size;
 	newq->head = q->head;
 	newq->tail = q->tail;
@@ -86,13 +83,13 @@ int test_que()
 {
     // que test
     que *q = que_init();
-    append(q, "ASDSAD");
-    append(q, "QWE");
+    que_append(q, "ASDSAD");
+    que_append(q, "QWE");
     print_que(q);
     
     if(!is_empty(q))
         printf("len: %ld\n", len(q));
-    printf("pop: %s\n", pop(q));
+    printf("pop: %s\n", que_pop(q));
     printf("len: %ld\n", len(q));
     
     que *qq = copy(q);

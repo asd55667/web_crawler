@@ -1,27 +1,27 @@
 #ifndef LIST_H
 #define LIST_H
 
-typedef struct
-{
+#include "utils.h"
+
+typedef struct node_tmp{
 	void *val;
-	node *prev, *next;
+	struct node_tmp *prev, *next;
 } node;
 
-typedef struct
-{
+typedef struct {
 	int size;
 	node *front, *back;
 } list;
 
 // init
-list *list_init();
+list *list_init(void);
 
 // find index of val
 int find(list *l, void *val);
 
-bool append(list *l, void *val);
+int list_append(list *l, void *val);
 
-void *pop(list *l);
+void *list_pop(list *l);
 
 void free_list(list *l);
 
