@@ -1,7 +1,6 @@
 #include "parser.h"
-#include "utils.h"
 
-int doc_parse(char *document){
+int doc_parse(char *document, que *q){
 
     char *pattern = "href=\"([a-zA-Z][a-zA-Z0-9+.-]*)://"
                     "([a-zA-Z0-9+.-]*sohu.com):?"
@@ -20,15 +19,17 @@ int doc_parse(char *document){
         return 1;
     };
     
-//    char *scheme, *host, *path, *query, *fragment;
-//    scheme = host = path = query = fragment = "";
-    char scheme[1<<4], host[1<<6], path[BUFSIZ], query[BUFSIZ], fragment[1<<6];
+        
     char *cursor = document;
     int cnt = 0;
     for (size_t m = 0; m < maxMatches; m++)
     {
         if (regexec(&regexCompiled, cursor, maxGroups, groupArray, 0))
             break;  // No more matches
+        
+        url_comp *url_components;
+        url_components = xmalloc(sizeof *url_components);
+        bzero(url_components, sizeof(*url_components));
         
         size_t offset = 0;
         for (size_t g = 0; g < maxGroups; g++){
@@ -43,29 +44,26 @@ int doc_parse(char *document){
             cursorCopy[groupArray[g].rm_eo] = 0;
             
             char *match = cursorCopy + groupArray[g].rm_so;
-//            printf("%lu ", g);
+
             if(DEBUG && g == 0){
                 fprintf(stdout, "%lu: [%2llu-%2llu]: %s\n",
                         g, groupArray[g].rm_so, groupArray[g].rm_eo, match);
                 }
-            else if(g == 1) strcpy(scheme, match);
-            else if(g == 2) strcpy(host, match);
-            else if(g == 3) strcpy(path, match);
-            else if(g == 4) strcpy(query, match);
-            else if(g == 5) strcpy(fragment, match);
+            else if(g == 1) strcpy(url_components->scheme, match);
+            else if(g == 2) strcpy(url_components->host, match);
+            else if(g == 3) strcpy(url_components->path, match);
+            else if(g == 4) strcpy(url_components->query, match);
+            else if(g == 5) strcpy(url_components->fragment, match);
             
         }
         cnt++;
         cursor += offset;
-        char *url_components[5];
-        url_components[0] = scheme;
-        url_components[1] = host;
-        url_components[2] = path;
-        url_components[3] = query;
-        url_components[4] = fragment;
-//        for(int i = 0; i < 5; i++)
-//            printf("%s\n", url_components[i]);
-//        printf("\n");
+        if(!full(q))
+          que_append(q, url_components);
+        else {
+            free(url_components);
+            break;
+        }
     }
     
     printf("%d matches\n", cnt);

@@ -5,9 +5,10 @@
 #include <netinet/in.h> // sockaddr_in sockaddr
 #include <netdb.h> // hostent gethostbyname
 
+#include "utils.h"
 
 void sock_send(int sock, const char *domain, int port, char *request);
 char *sock_recv(int sock);
 
-
+char *doc_get(int sock, url_comp *url_component);
 #endif

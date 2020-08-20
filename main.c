@@ -20,44 +20,47 @@
 
 int main(int argc, char **argv)
 {
-    //const char *domain = strlen(argv[1]) > 0 ? argv[1] : "localhost";
-    //const int port = atoi(argv[2]) > 0 ? atoi(argv[2]) : 80;
-    //    const char *domain = "mini.wuchengwei.icu";
     
-  	const char *domain = "news.sohu.com";
-   	const int port = 80;
-
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    url_comp *url_component;
+    url_component = xmalloc(sizeof *url_component);
+    bzero(url_component, sizeof(*url_component));
+    strcat(url_component->host, "news.sohu.com");
+    strcat(url_component->path, "/");
+    que *q = que_init();
+    que_append(q, url_component);
     
-    char request[BUFSIZ];
-    // http/1.1 must have host field
-    char *head = "GET / HTTP/1.1\r\n";
-    sprintf(request, "%sHost: %s\r\n", head, domain);
-
-    strcat(request, "User-Agent: wcw-c-demo\r\n");
-    strcat(request, "Connection: Close\r\n");
-    strcat(request, "\r\n");
-    
-    sock_send(sock, domain, port, request);
-
     double iStart = seconds();
     
-    char *document = sock_recv(sock);
+    int cnt = 0;
+    FILE *fp = fopen("a.html", "w");
     
-    double iEnd = seconds();
-    printf("\n%fs\n", iEnd - iStart);
-    
-    doc_parse(document);
-    printf("%fs\n", seconds() - iEnd);
+    while (cnt < 10000){
+        int sock = socket(AF_INET, SOCK_STREAM, 0);
+        url_comp *url_ = que_pop(q);
+        char url[BUFSIZ];
+        bzero(url, BUFSIZ);
+        strcat(url, url_->scheme);
+        strcat(url, "://");
+        strcat(url, url_->host);
+        strcat(url, url_->path);
+        strcat(url, url_->query);
+        strcat(url, url_->fragment);
+        fprintf(fp, "%s\n", url);
+        char *document = doc_get(sock, url_);
+        doc_parse(document, q);
+//        free(document);
+    }
+    free_que(q);
+    printf("%fs\n", seconds() - iStart);
     
 //    FILE *fp = fopen("a.html", "w");
 //    printf("%lu\n", strlen(document));
 //    fprintf(fp, "%s", document);
 //    FILE *fp = fopen("a.html", "r");
 //    char *document = fgetls(fp);
-//    fclose(fp);
+    fclose(fp);
     
-    free(document);
+//    free(document);
     
 
 //    getchar();

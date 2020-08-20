@@ -7,8 +7,9 @@
 #include <regex.h>
 #include <limits.h>
 
+#include "utils.h"
+#include "que.h"
 
-
-int doc_parse(char *document);
+int doc_parse(char *document, que *q);
 
 #endif

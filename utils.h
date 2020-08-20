@@ -12,8 +12,17 @@
 #include <limits.h>
 #include <string.h>
 #include <stdlib.h>
-//#include "que.h"
+
 #include <sys/time.h>
+
+
+typedef struct {
+    char scheme[1<<4];
+    char host[1<<6];
+    char path[BUFSIZ];
+    char query[BUFSIZ];
+    char fragment[1<<6];
+} url_comp;
 
 static inline double seconds(){
     struct timeval tp;

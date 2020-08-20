@@ -27,24 +27,43 @@ int is_empty(que *q)
 	return 0;
 }
 
-int que_append(que *q, char *val)
+int que_append(que *q, url_comp *val)
 {
-	if((q->head - q->tail + QUE_SIZE) % QUE_SIZE == 1)
-        return 0;
+    if(full(q)) return 0;
 	q->val[q->tail] = val;
 	q->tail = (q->tail + 1) % QUE_SIZE;
 	q->size++;
     return 1;
 }
 
-char *que_pop(que *q)
+int full(que *q){
+    if((q->head - q->tail + QUE_SIZE) % QUE_SIZE == 1)
+        return 1;
+    return 0;
+}
+
+url_comp *que_pop(que *q)
 {
 	if(is_empty(q))
 		return NULL;
 	size_t head = q->head;
 	q->head = (q->head + 1) % QUE_SIZE;
 	q->size--;
-	return q->val[head];
+    
+//    url_comp *front;
+//    front = xmalloc(sizeof *front);
+//    bzero(front, sizeof *front);
+    
+    url_comp *tmp = q->val[head];
+    q->val[head] = NULL;
+    
+    return tmp;
+}
+
+void free_que(que *q){
+    for(int i = 0; i < q->size; i++)
+        free(q->val[i]);
+    free(q);
 }
 
 que *copy(que *q)
@@ -55,50 +74,50 @@ que *copy(que *q)
 	return newq;
 }
 
-que *deepcopy(que *q)
-{	
-	que *newq;
-    newq = xmalloc(sizeof *q);
-	newq->size = q->size;
-	newq->head = q->head;
-	newq->tail = q->tail;
-	for(int i = 0; i < q->size; i++)
-		newq->val[i] = strdup(q->val[i]);
-	return newq;
-}
-
-
-void print_que(que *q)
-{
-	if(q)
-	{
-        for(int i = 0; i < q->size; i++)
-            printf("%d: %s\n", i, q->val[i]);
-//		printf("size: %ld", q->size);
-	}
-}	
-
-
-int test_que()
-{
-    // que test
-    que *q = que_init();
-    que_append(q, "ASDSAD");
-    que_append(q, "QWE");
-    print_que(q);
-    
-    if(!is_empty(q))
-        printf("len: %ld\n", len(q));
-    printf("pop: %s\n", que_pop(q));
-    printf("len: %ld\n", len(q));
-    
-    que *qq = copy(q);
-    que *qqq = deepcopy(q);
-    free(q);
-    free(qq);
-    free(qqq);
-    
-    getchar();
-    return 0;
-    
-}
+//que *deepcopy(que *q)
+//{
+//	que *newq;
+//    newq = xmalloc(sizeof *q);
+//	newq->size = q->size;
+//	newq->head = q->head;
+//	newq->tail = q->tail;
+//	for(int i = 0; i < q->size; i++)
+//		newq->val[i] = strdup(q->val[i]);
+//	return newq;
+//}
+//
+//
+//void print_que(que *q)
+//{
+//	if(q)
+//	{
+//        for(int i = 0; i < q->size; i++)
+//            printf("%d: %s\n", i, q->val[i]);
+////		printf("size: %ld", q->size);
+//	}
+//}
+//
+//
+//int test_que()
+//{
+//    // que test
+//    que *q = que_init();
+//    que_append(q, "ASDSAD");
+//    que_append(q, "QWE");
+//    print_que(q);
+//
+//    if(!is_empty(q))
+//        printf("len: %ld\n", len(q));
+//    printf("pop: %s\n", que_pop(q));
+//    printf("len: %ld\n", len(q));
+//
+//    que *qq = copy(q);
+//    que *qqq = deepcopy(q);
+//    free(q);
+//    free(qq);
+//    free(qqq);
+//
+//    getchar();
+//    return 0;
+//
+//}
