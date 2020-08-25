@@ -9,7 +9,8 @@
 
 #include "utils.h"
 #include "que.h"
+#include "bloom_filter.h"
 
-int doc_parse(char *document, que *q);
+int doc_parse(char *document, que *q, bloom_filter *bf);
 
 #endif

@@ -1,5 +1,6 @@
 #include "sock.h"
 
+
 void sock_send(int sock, const char *domain, int port, char *request){
     if(DEBUG) printf("Request info:\n%s\n", request);
     if(sock < 0) error("Fail to opening socket");
@@ -31,7 +32,7 @@ void sock_send(int sock, const char *domain, int port, char *request){
 
 char *sock_recv(int sock){
     // size should be greater than recv buffer, or may cause multiple call of recv, and the risk of realloc error
-    size_t size = 1 << 11;
+    size_t size = 1 << 30;
     char *document = xmalloc(size * sizeof(char));
     
     size_t len = 0;
@@ -48,9 +49,9 @@ char *sock_recv(int sock){
         size_t recv_size = recv(sock, response, BUFSIZ, 0);
 //        size_t recv_size = read(sock, response, BUFSIZ);
 //        printf("%lu\n", recv_size);
-        memcpy(document + len, response, recv_size);
-//        strcat(document, response);
-        if(DEBUG) fprintf(stdout, "%s\n", response);
+//        memcpy(document + len, response, recv_size);
+        strcat(document, response);
+        if(DEBUG && len < 1024) fprintf(stdout, "%s\n", response);
         if(recv_size < 0) error("Error reading from sock");
         
         // recv_size == 0 will create an reduntant call of recv, meanwhile the remote has been close already
@@ -70,9 +71,11 @@ char *doc_get(int sock, url_comp *url_component){
     char request[BUFSIZ];
     char path[BUFSIZ];
     bzero(path, sizeof(char) * BUFSIZ);
+    bzero(request, sizeof(char) * BUFSIZ);
     if(!*url_component->path) strcat(path, "/");
     else strcat(path, url_component->path);
     strcat(path, url_component->query);
+    
     sprintf(request, "GET %s HTTP/1.1\r\n"
                     "Host: %s\r\n"
                     "User-Agent: wcw-c-demo\r\n"
@@ -80,8 +83,7 @@ char *doc_get(int sock, url_comp *url_component){
             "\r\n",  path, url_component->host);
     
     sock_send(sock, url_component->host, 80, request);
+    free(url_component);
     return sock_recv(sock);
-//    char *document = sock_recv(sock);
-//    return document;
 }
 

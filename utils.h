@@ -24,6 +24,16 @@ typedef struct {
     char fragment[1<<6];
 } url_comp;
 
+static inline void url_comp_merge(char *url, url_comp *url_components){
+    bzero(url, sizeof(url));
+    strcat(url, url_components->scheme);
+    strcat(url, "://");
+    strcat(url, url_components->host);
+    strcat(url, url_components->path);
+    strcat(url, url_components->query);
+    strcat(url, url_components->fragment);
+}
+
 static inline double seconds(){
     struct timeval tp;
     gettimeofday(&tp, NULL);

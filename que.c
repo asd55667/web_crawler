@@ -58,6 +58,8 @@ url_comp *que_pop(que *q)
     q->val[head] = NULL;
     
     return tmp;
+    
+    return q->val[head];
 }
 
 void free_que(que *q){

@@ -1,6 +1,6 @@
 #include "parser.h"
 
-int doc_parse(char *document, que *q){
+int doc_parse(char *document, que *q, bloom_filter *bf){
 
     char *pattern = "href=\"([a-zA-Z][a-zA-Z0-9+.-]*)://"
                     "([a-zA-Z0-9+.-]*sohu.com):?"
@@ -22,13 +22,16 @@ int doc_parse(char *document, que *q){
         
     char *cursor = document;
     int cnt = 0;
+    
+//    FILE *fp = fopen("b.html", "w");
+    
     for (size_t m = 0; m < maxMatches; m++)
     {
         if (regexec(&regexCompiled, cursor, maxGroups, groupArray, 0))
             break;  // No more matches
         
         url_comp *url_components;
-        url_components = xmalloc(sizeof *url_components);
+        url_components = xmalloc(sizeof(url_comp));
         bzero(url_components, sizeof(*url_components));
         
         size_t offset = 0;
@@ -58,8 +61,19 @@ int doc_parse(char *document, que *q){
         }
         cnt++;
         cursor += offset;
-        if(!full(q))
-          que_append(q, url_components);
+        
+        char url[BUFSIZ];
+        url_comp_merge(url, url_components);
+
+        if(!full(q)) {
+            if(bf_add(bf, url)){
+//                fprintf(fp, "\"%s\",\n",url);
+                que_append(q, url_components);
+            }
+            else{
+                free(url_components);
+            }
+        }
         else {
             free(url_components);
             break;
@@ -68,5 +82,7 @@ int doc_parse(char *document, que *q){
     
     printf("%d matches\n", cnt);
     regfree(&regexCompiled);
+//    free(document);
+//    fclose(fp);
     return 0;
 }

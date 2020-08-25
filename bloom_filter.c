@@ -3,17 +3,18 @@
 #include <stdlib.h>
 
 #include "bloom_filter.h"
-
+    
 bloom_filter *bf_init(uint32_t k, uint32_t nboxes)
 {
 	bloom_filter *bf;
 	bf = malloc(sizeof *bf);
-	bf->bits = malloc(((nboxes >> 3) + 1) * sizeof bf->bits);
+    // actual bytes + 1bit
+	bf->bits = malloc(((nboxes >> 3) + 1) * sizeof *bf->bits);
 
-    bf->n = 0;
-    bf->k = k;
+    bf->n = 0; // num of element
+    bf->k = k; // num of hash >=4
 	bf->size = nboxes;
-	bf->offset = nboxes / k;
+	bf->offset = nboxes / k; // nboxes divide into k block, offset represent the block size
 	return bf;
 }
 
@@ -35,7 +36,7 @@ void bf_hash(uint32_t *hashes, uint32_t k, char *key)
 	hashes[0] = murmur3_32(key, len, 0);
 	hashes[1] = fnv1a(key, len);
 
-	for(uint32_t i = 4; i < k; i++)
+	for(uint32_t i = 2; i < k; i++)
 		hashes[i] = hashes[1] + ((i + hashes[0]) % 18446744073709551557U);
 }
 

@@ -1,8 +1,6 @@
 #ifndef BLOOM_FILTER_H
 #define BLOOM_FILTER_H
 
-#define N_BOXES 23
-
 #include <stdio.h>
 #include "hashlib.h"
 
@@ -39,9 +37,6 @@ int bf_contain(bloom_filter *bf, char *key);
 
 void free_bf(bloom_filter *bf);
 void print_bf(bloom_filter *bf);
-
-
-
 
 
 #endif
