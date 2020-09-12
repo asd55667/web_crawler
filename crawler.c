@@ -47,9 +47,13 @@ int main(int argc, char **argv)
         cnt++;
     }
 
+
+    
     free_que(q);
-    fclose(fp);
+    
     printf("%fs\n", seconds() - iStart);
+
+    fclose(fp);
 
 //    getchar();
     return 0;

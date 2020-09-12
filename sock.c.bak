@@ -1,5 +1,48 @@
 #include "sock.h"
 
+void init_openssl()
+{
+    SSL_load_error_strings();
+    OpenSSL_add_ssl_algorithms();
+}
+
+void cleanup_openssl()
+{
+    EVP_cleanup();
+}
+
+SSL_CTX *create_context()
+{
+    const SSL_METHOD *method;
+    SSL_CTX *ctx;
+
+    method = SSLv23_server_method();
+
+    ctx = SSL_CTX_new(method);
+    if (!ctx) {
+    perror("Unable to create SSL context");
+    ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+    }
+
+    return ctx;
+}
+
+void configure_context(SSL_CTX *ctx)
+{
+    SSL_CTX_set_ecdh_auto(ctx, 1);
+
+    /* Set the key and cert */
+    if (SSL_CTX_use_certificate_file(ctx, "cert.pem", SSL_FILETYPE_PEM) <= 0) {
+        ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+    }
+
+    if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0 ) {
+        ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+    }
+}
 
 void sock_send(int sock, const char *domain, int port, char *request){
     if(DEBUG) printf("Request info:\n%s\n", request);
@@ -17,11 +60,25 @@ void sock_send(int sock, const char *domain, int port, char *request){
     if(connect(sock, (struct sockaddr *)&serv_addr, sizeof (serv_addr)) < 0)
         error("Fail to connect host");
     
+    // tls context
+    SSL_CTX *ctx;
+    init_openssl();
+    ctx = create_context();
+
+    configure_context(ctx);
+    SSL *ssl = SSL_new(ctx);
+
+    SSL_set_fd(ssl, sock);
+    
+    if (SSL_accept(ssl) <= 0) {
+        ERR_print_errors_fp(stderr);
+    }
+    else {
+        
         size_t total = strlen(request);
         size_t sent = 0;
         while(sent < total){
-            size_t bytes = send(sock, request + sent, total - sent, 0);
-//            int bytes = SSL_write(ssl, request + sent, (int)(total - sent));
+            int bytes = SSL_write(ssl, request + sent, (int)(total - sent));
             if(bytes < 0)
                 error("Error writing to sock");
             if(bytes == 0)
@@ -29,6 +86,13 @@ void sock_send(int sock, const char *domain, int port, char *request){
             sent += bytes;
         }
         
+    }
+    
+
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+    cleanup_openssl();
 }
 
 char *sock_recv(int sock){
@@ -55,7 +119,9 @@ char *sock_recv(int sock){
         if(DEBUG && len < 1024) fprintf(stdout, "%s\n", response);
         if(recv_size < 0) error("Error reading from sock");
         
+        // recv_size == 0 will create an reduntant call of recv, meanwhile the remote has been close already
         if(recv_size == 0){
+//        if(recv_size < BUFSIZ){
             close(sock);
             break;
         }
