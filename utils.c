@@ -91,4 +91,3 @@ char *fgetl(FILE *fp){
         if(line[cur - 1] == 0x0a) line[cur - 1] = 0x00;
     return line;
 }
-

@@ -6,13 +6,17 @@
 #include <netdb.h> // hostent gethostbyname
 #include <arpa/inet.h>
 
+#include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
 #include "utils.h"
 
-void sock_send(int sock, const char *domain, int port, char *request);
+void sock_send(int sock, char *request);
 char *sock_recv(int sock);
+
+void ssl_send(BIO* bio, char* request);
+char *ssl_recv(BIO *bio);
 
 char *doc_get(url_comp *url_component);
 #endif

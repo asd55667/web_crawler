@@ -52,7 +52,6 @@ void *xrealloc(void *p, size_t size);
 char *fgetls(FILE *fp);
 char *fgetl(FILE *fp);
 
-
 #endif
 
 

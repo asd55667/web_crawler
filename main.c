@@ -31,12 +31,11 @@ int main(int argc, char **argv)
     double iStart = seconds();
     
     FILE *fp = fopen("b.html", "w");
-    
     int cnt = 0;
-    while (cnt < 10000){
+    while (cnt < 1000){
         url_comp *url_ = que_pop(q);
         if(!url_) break;
-        
+
         char url[BUFSIZ];
         url_comp_merge(url, url_);
 
@@ -46,6 +45,11 @@ int main(int argc, char **argv)
         doc_parse(document, q, bf);
         cnt++;
     }
+    
+//    FILE *fp = fopen("a.html", "r");
+//    char *document = fgetls(fp);
+//    doc_parse(document, q, bf);
+    
 
     free_que(q);
     fclose(fp);

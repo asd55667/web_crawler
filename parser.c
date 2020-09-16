@@ -2,7 +2,12 @@
 
 int doc_parse(char *document, que *q, bloom_filter *bf){
 
-    char *pattern = "href=\"([a-zA-Z][a-zA-Z0-9+.-]*)://"
+//    char *pattern = "href=\"([a-zA-Z][a-zA-Z0-9+.-]*)://"
+//                    "([a-zA-Z0-9+.-]*sohu.com):?"
+//                    "([/[a-zA-Z0-9_-]+]*)?"
+//                    "[?]?([a-zA-Z0-9]*=[a-zA-z0-9=]*)?"
+//                    "[#]?([.]*)?";
+    char *pattern = "[href=\"|Location: ]([a-zA-Z][a-zA-Z0-9+.-]*)://"
                     "([a-zA-Z0-9+.-]*sohu.com):?"
                     "([/[a-zA-Z0-9_-]+]*)?"
                     "[?]?([a-zA-Z0-9]*=[a-zA-z0-9=]*)?"
